@@ -1,0 +1,35 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: build
+    image: ubuntu
+    commands:
+      - apt update
+
+  - name: gitea_release
+    image: plugins/gitea-release
+    settings:
+      base_url: https://git.nareshkumarrao.com
+      api_key:
+        from_secret: gitea_token
+      files: built.o
+    when:
+      event: tag
+
+  - name: github_publish
+    image: plugins/github-release
+    settings:
+      api_key: 
+        from_secret: github_token
+      files: built.o
+    when:
+      event: tag
+
+trigger:
+  event:
+    - push
+    - tag
+
